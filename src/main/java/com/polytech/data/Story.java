@@ -13,8 +13,6 @@ public class Story {
 
     @Override
     public String toString() {
-        return "data.Story{" +
-                "content=" + content +
-                '}';
+        return "{" + "\"content\":\"" + content + "\"}";
     }
 }
