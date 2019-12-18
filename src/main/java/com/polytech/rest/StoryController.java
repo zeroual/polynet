@@ -3,7 +3,8 @@ package com.polytech.rest;
 import com.polytech.business.PublicationService;
 import com.polytech.data.InMemoryStoryRepository;
 import com.polytech.data.Story;
-import com.polytech.data.StoryRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -15,30 +16,31 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@WebServlet("/stories")
-public class StoryController extends HttpServlet {
+@RestController
+@CrossOrigin(origins = "*")
+public class StoryController {
     private PublicationService publicationService;
 
-    public StoryController(PublicationService publicationService) {
-        this.publicationService = publicationService;
+
+    public StoryController() {
+        InMemoryStoryRepository storyRepository = new InMemoryStoryRepository();
+        this.publicationService = new PublicationService(storyRepository);
+
     }
 
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String content = req.getParameter("content");
-        publicationService.share(new Story(content));
-        resp.setStatus(201);
+    @PostMapping("/stories")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void share(@RequestBody Story story) {
+        publicationService.share(story);
     }
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        List<Story> stories = publicationService.fetchAll();
-
-        PrintWriter writer = resp.getWriter();
-
-        resp.setContentType("application/json");
-        String body = stories.stream().map(story -> story.toString()).collect(Collectors.joining(","));
-
-        writer.println("[" + body + "]");
+    @GetMapping("/stories")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Story> fetchAll() {
+        return publicationService.fetchAll();
+    }
+    @GetMapping("/hello/{name}")
+    public String toto(@PathVariable("name") String name){
+        return "hello " + name;
     }
 }
